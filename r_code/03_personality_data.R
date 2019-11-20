@@ -3,7 +3,7 @@
 
 
 # Load helper functions
-setwd("D:\\Users\\Linda Tempel\\Documents\\Psychologie\\Masterarbeit\\Daten")
+setwd("")
 source('./r_functions/getPacks.R') # <- path to getPacks function
 
 # Load necessary packages
@@ -91,9 +91,6 @@ BRIEF_scales <- dplyr::select(BRIEF, VP, Inhibit:GEC)
 
 SOGS <-Data_pers %>% dplyr::select(VP, SO01_01:SO16_11)
 
-#Nicht mitberechnet werden: Frage 1,2,3, 12, 16j, 16k
-#generell: Antwort ja =1 
-# 4: meistens/immer, 5: ja, weniger als Häfte/ja, meistens 6: ja in Vergangenheit/ja
 
 SOGS <-Data_pers %>% dplyr::select(VP, SO04:SO11, SO13:SO16_09)
 
@@ -212,7 +209,7 @@ Data_age$age_cat<-factor(Data_age$age_cat, levels =c(1,2,3,4), labels =c('18-30'
 Data_pers_full <- merge (Data_pers_full, Data_age)
 
 
-#Missings
+# check Missings
 which(is.na(Data_pers_full))
 
 

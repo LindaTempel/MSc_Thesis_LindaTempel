@@ -2,7 +2,7 @@
 
 
 # Load helper functions
-setwd("D:\\Users\\Linda Tempel\\Documents\\Psychologie\\Masterarbeit\\Daten")
+setwd("")
 source('./r_functions/getPacks.R') # <- path to getPacks function
 
 # Load necessary packages
@@ -20,7 +20,7 @@ rm(pkgs)
 # ----- 1) Read in the data -------------------------------------------
 
 # # Set path before start
-path <- c("D:\\Users\\Linda Tempel\\Documents\\Psychologie\\Masterarbeit\\Daten\\rawdata") # <- location of files
+path <- c("") # <- location of files
 
 paths <- dir(path = path, full.names = T, pattern = "\\.txt$")
 names(paths) <- basename(paths)
@@ -274,20 +274,15 @@ names(Data_B2)[11:13] <- c('gain','loss', 'net_payoff')
 Data_card<-rbind(Data_B1, Data_B2)
 
 
-print(levels(Data_card$Card))
 
-##Missings
+## remove Missings
 
 which(is.na(Data_card))
-
 Data_card <- na.omit(Data_card)
-Data_card <- Data_card %>%drop_na()
+which(is.na(Data_card))
 
+print(levels(Data_card$Card))
 Data_card$Card <-droplevels.factor(Data_card$Card, exclude= c(0))
-
-##--> wie mit fehlerhaften umgehen?
-
-#Data_card$Card = factor(Data_card$Card, levels(Data_card$Card)[c(2,5,4,3,1)])
-
+print(levels(Data_card$Card))
 
 
