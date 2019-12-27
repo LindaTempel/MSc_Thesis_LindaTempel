@@ -1,31 +1,28 @@
-########GET Sosci Survey Data
-
-
-
+##### ##### ##### #####    Get Soscisurvey data   ##### ##### ##### #####
+#                              September 2019 
+#                                     
+# 
 # Load helper functions
 setwd("")
 source('./r_functions/getPacks.R') # <- path to getPacks function
 
 # Load necessary packages
-pkgs <- c('dplyr', 'plyr', 'Hmisc', 'multcomp', 'effects', 'phia', 'emmeans', 'lme4',
-          'sjPlot', 'lmerTest', 'stargazer', 'lemon', 'gridExtra', 'ggplot2', 'tidyr',
-          'reshape2', 'corrplot', 'visreg', 'pwr', 'lattice', 'viridis', 'rcompanion',
-          'apaTables', 'scales', 'foreign', 'psych', 'pastecs', 'ppcor', 'car', 'ez', 
-          'nlme', 'QuantPsyc', 'stats', 'mediation', 'jtools')
+pkgs <- c('dplyr', 'plyr', 'Hmisc',  'ggplot2', 'tidyr','reshape2', 'corrplot', 
+          'viridis', 'rcompanion', 'apaTables', 'scales', 'foreign', 'psych',
+          'pastecs', 'ppcor')
 getPacks(pkgs)
 rm(pkgs)
 
 
-
 # ----- 1) Read Soscisurvey file ----
 
-Data_pers <- read.csv(file = "./data_gambling2019_2.csv", sep = ";", header=T)
+Data_pers <-  read.csv(file = "./data_gambling2019_4.csv", sep = ";", header=T)
 
 
 # ----- 2) Remove Pilot Data and Dropouts-----------------------------
 Data_pers <- Data_pers[-c(1, 6, 10), ]
 
-# ----- 4) Select relevant variables ---------------------
+# ----- 3) Select relevant variables ---------------------
 Data_pers <- Data_pers %>% dplyr::select(RS01_01: RS01_84, 
                                          SD01:SD23_01, 
                                          SO01_01:SO16_11,
@@ -34,7 +31,7 @@ Data_pers <- Data_pers %>% dplyr::select(RS01_01: RS01_84,
 
 names(Data_pers)[names(Data_pers) == 'SD23_01'] <- 'VP'
 
-# ----- 7) Compute RST scale scores -----------------------
+# ----- 4) Compute RST scale scores -----------------------
 
 # Select RST data
 RST <- Data_pers %>% dplyr::select(VP, RS01_01:RS01_84)
@@ -43,7 +40,7 @@ RST <- Data_pers %>% dplyr::select(VP, RS01_01:RS01_84)
 RST <- dplyr::select(RST, -RS01_63, -RS01_49, -RS01_59, -RS01_72)
 
 
-# ----- Create aggregated scale values-------------------------
+# ----- Create aggregated scale values
 # RST SCALE VALUES
 RST <- dplyr::mutate(RST, 
                      FFFS = (RS01_10 + RS01_24 + RS01_52 + RS01_60 + RS01_61 + RS01_64 + RS01_69 + RS01_77 + RS01_78 + RS01_81),
@@ -55,15 +52,14 @@ RST <- dplyr::mutate(RST,
                      BAS_Goal_Drive = (RS01_05 + RS01_13 + RS01_25 + RS01_39 + RS01_54 + RS01_71 + RS01_84),
                      BAS_Impulsiv = (RS01_29 +  RS01_35 + RS01_36 + RS01_48 + RS01_53 + RS01_57 + RS01_68 + RS01_70))
 
-# ----- Overall RST-SCORE
-# RST SCORE
+# BAS SCORE
 RST <- dplyr::mutate(RST, 
                      BAS_Score = (BAS_Rew_Int + BAS_Rew_Reac + BAS_Goal_Drive + BAS_Impulsiv))
 
 RST_scales <- dplyr::select(RST, VP, FFFS:BAS_Score)
 
 
-##---------------- BRIEF SCALE VALUES------------
+# ----- 5) Compute BRIEF scale scores -----------------------
 
 BRIEF <- Data_pers %>% dplyr::select(VP, BR11_01:BR11_55)
 
@@ -77,7 +73,7 @@ BRIEF <- dplyr::mutate(BRIEF,
                      Task_completion = (BR11_41 + BR11_42 + BR11_43 + BR11_44 + BR11_45 + BR11_46 + BR11_47),
                      Validity = (BR11_07 + BR11_08 + BR11_09))
 
-# ----- Overall BRIEF-SCORE
+# ------ Overall BRIEF-SCORE
 BRIEF <- dplyr::mutate(BRIEF, 
                      BRI = (Inhibit + Self_monitor), 
                      ERI= (Shift + Emotional_control), 
@@ -87,14 +83,13 @@ BRIEF <- dplyr::mutate(BRIEF,
 BRIEF_scales <- dplyr::select(BRIEF, VP, Inhibit:GEC)
 
 
-#-------SOGS Score-----------------------------
+#------ 6) Compute SOGS Score-----------------------------
 
 SOGS <-Data_pers %>% dplyr::select(VP, SO01_01:SO16_11)
 
-
 SOGS <-Data_pers %>% dplyr::select(VP, SO04:SO11, SO13:SO16_09)
 
-#ist NA wenn Frage nicht angezeigt wurde aufgrund vorheriger Antwort
+#in case of NA at question 13 add value no 
 SOGS$SO13[is.na(SOGS$SO13)] <- 2
 
 
@@ -125,24 +120,45 @@ SOGS <-mutate (SOGS, SOGS_Score=(Score1+Score2+Score3+Score4+Score5+Score6+Score
 
 SOGS_score <-SOGS %>% dplyr::select(VP, SOGS_Score)
 
-##-----------------Create Personality scale data set
-Data_sosci <- merge (BRIEF_scales, RST_scales, by.x = 'VP', by.y = 'VP')
+# use cutoff 4 to label score
 
+for (i in 1:nrow(SOGS_score)) {
+  
+  if (SOGS_score[i, 2]>4){
+    SOGS_score[i,3]<-2
+    
+  } else if  (SOGS_score[i, 2] <4 ) {
+    SOGS_score[i,3] <- 1
+    
+  }
+  
+}
+
+rm(i)
+names(SOGS_score)[3] <- c('SOGS')
+
+SOGS_score$SOGS<-factor(SOGS_score$SOGS, levels =c(1,2), labels =c('no pathological gambling','pathological gambling'))
+
+
+#------ 7) Combine data frames--------
+
+Data_sosci <- merge (BRIEF_scales, RST_scales, by.x = 'VP', by.y = 'VP')
 Data_sosci <- merge (Data_sosci, SOGS_score, by.x = 'VP', by.y = 'VP')
 
+rm(BRIEF_scales, RST_scales, SOGS_score)
 
 
-### Add scores to the rest of data
+### Add gender
 
 Data_pers2 <-Data_pers %>% dplyr::select(VP, SD01)
 Data_pers_full <-merge(Data_pers2, Data_sosci, by.x = 'VP', by.y = 'VP')
 
+rm(Data_pers2)
 
 names(Data_pers_full)[names(Data_pers_full) == 'SD01'] <- 'Gender'
 
 
-
-#Add Age variable
+### Add Age variable
 
 Data_age <- dplyr::select(Data_pers, VP)
 
@@ -197,8 +213,35 @@ for (i in 1:nrow(Data_age)) {
     Data_age[i,2] <- 48
     Data_age[i,3]<-3
     
-  }
+  } else if  (Data_age[i, 1] == '1164' ) {
+    Data_age[i,2] <- 34
+    Data_age[i,3]<-2
+    
+  } else if  (Data_age[i, 1] == '1600' ) {
+    Data_age[i,2] <- 52
+    Data_age[i,3]<-4
+    
+  } else if  (Data_age[i, 1] == '1531' ) {
+    Data_age[i,2] <- 36
+    Data_age[i,3]<-2
+    
+  } else if  (Data_age[i, 1] == '1621' ) {
+    Data_age[i,2] <- 27
+    Data_age[i,3]<-1
+    
+  } else if  (Data_age[i, 1] == '1409' ) {
+    Data_age[i,2] <- 35
+    Data_age[i,3]<-2
+    
+  } else if  (Data_age[i, 1] == '1881' ) {
+  Data_age[i,2] <- 22
+  Data_age[i,3]<-1
   
+  } else if  (Data_age[i, 1] == '1878' ) {
+  Data_age[i,2] <- 50
+  Data_age[i,3]<-3
+  
+  }
 }
 
 rm(i)
@@ -207,7 +250,7 @@ names(Data_age)[2:3] <- c('age', 'age_cat')
 Data_age$age_cat<-factor(Data_age$age_cat, levels =c(1,2,3,4), labels =c('18-30','31-40', '41-50', '50+'))
 
 Data_pers_full <- merge (Data_pers_full, Data_age)
-
+rm(Data_age)
 
 # check Missings
 which(is.na(Data_pers_full))
@@ -215,7 +258,7 @@ which(is.na(Data_pers_full))
 
 
 
-#-----Internal consistency------
+#-----  8) Check Internal consistency------
 
 # Chronbach's Alpha (internal concistency) 
 psych::alpha(RST[, grep(names(RST), pattern = '^RS')], 
@@ -310,10 +353,6 @@ psych::alpha(dplyr::select(BRIEF, BR11_41, BR11_42, BR11_43, BR11_44,BR11_45,
                              BR11_46, BR11_47), 
              check.keys = TRUE)
 
-##Validity
-psych::alpha(dplyr::select(BRIEF, BR11_07,BR11_08, BR11_09), 
-             check.keys = TRUE)
-
 ##BRI
 
 psych::alpha(dplyr::select(BRIEF, BR11_10, BR11_11, BR11_12, BR11_13, BR11_14, 
@@ -344,5 +383,4 @@ psych:alpha(dplyr::select(BRIEF, BR11_10, BR11_11, BR11_12, BR11_13, BR11_14,
                             BR11_21, BR11_22, BR11_23, BR11_24, BR11_25, BR11_26, BR11_27), 
             check.keys = TRUE)
 
-
-
+rm(BRIEF, RST, SOGS)
