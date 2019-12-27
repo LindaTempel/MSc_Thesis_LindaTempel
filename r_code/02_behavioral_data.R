@@ -1,20 +1,16 @@
-############## GET Behavioral data
-
-
+##### ##### ##### #####    Get behavioral data   ##### ##### ##### #####
+#                                 August 2019 
+#                                     
+# 
 # Load helper functions
 setwd("")
 source('./r_functions/getPacks.R') # <- path to getPacks function
 
 # Load necessary packages
-pkgs <- c('dplyr', 'plyr', 'Hmisc', 'multcomp', 'effects', 'phia', 'emmeans', 'lme4',
-          'sjPlot', 'lmerTest', 'stargazer', 'lemon', 'gridExtra', 'ggplot2', 'tidyr',
-          'reshape2', 'corrplot', 'visreg', 'pwr', 'lattice', 'viridis', 'rcompanion',
-          'apaTables', 'scales', 'foreign', 'psych', 'pastecs', 'ppcor', 'car', 'ez', 
-          'nlme', 'QuantPsyc', 'stats', 'mediation', 'jtools')
+pkgs <- c('dplyr', 'plyr', 'Hmisc', 'ggplot2', 'tidyr','reshape2', 'corrplot', 'viridis', 'rcompanion',
+          'apaTables', 'scales', 'foreign', 'psych', 'pastecs', 'QuantPsyc', 'stats')
 getPacks(pkgs)
 rm(pkgs)
-
-
 
 
 # ----- 1) Read in the data -------------------------------------------
@@ -45,15 +41,17 @@ names(Data_behav) <- c('VP', 'Condition', 'Block', 'Trial', 'Deck', 'Value', 'RT
 
 Data_behav$VP<- gsub(Data_behav$VP, pattern = "rawdata.txt", replacement = "")
 
-# Label factor variables/make them factors
+# Create and label factor variables
+
 Data_behav$Condition<-factor(Data_behav$Condition, levels = c(1,2), 
                             labels=c("1_Belohnt", "2_Belohnt"))
 
 
 Data_behav$Block<-factor(Data_behav$Block, levels =c(1,2), labels =c(1,2))
 
+# ----- 3) Create new variables-----------------------------------------
 
-#Add variable "reward"
+#Add variable REWARD
 
 for (i in 1:nrow(Data_behav)) {
   
@@ -75,15 +73,13 @@ for (i in 1:nrow(Data_behav)) {
   }
 }
 
-
-
 rm(i)
 names(Data_behav)[9] <- c('reward')
 
 Data_behav$reward<-factor(Data_behav$reward, levels =c(1,2), labels =c('reward','no reward'))
 
 
-# Split file into blocks 
+# Add variable CARD
 
 Data_B1<-dplyr::filter(Data_behav, Block==1)
 unique(Data_B1$Block)
@@ -91,7 +87,7 @@ unique(Data_B1$Block)
 Data_B2<-dplyr::filter(Data_behav, Block==2)
 unique(Data_B2$Block)
 
-# Add variable CARD
+
 Data_B1$Deck <- factor(Data_B1$Deck)
 Data_B1$Card <- plyr::revalue(Data_B1$Deck, c('1' = 'A', '2' = 'B', '3' = 'C', '4' = 'D'))
 
@@ -99,9 +95,7 @@ Data_B2$Deck <- factor(Data_B2$Deck)
 Data_B2$Card <- plyr::revalue(Data_B2$Deck, c('1' = 'B', '2' = 'C', '3' = 'D', '4' = 'A'))
 
 
-
-
-# ------ Add GAIN & LOSS columns for Block 1 and variable NET_PAYOFF-----
+# ------ Add GAIN & LOSS columns for Block 1 and variable NET_PAYOFF
 
 for (i in 1:nrow(Data_B1)) {  
   
@@ -184,7 +178,7 @@ for (i in 1:nrow(Data_B1)) {
 rm(i)
 names(Data_B1)[11:13] <- c('gain','loss', 'net_payoff')
 
-# ------ Add GAIN & LOSS columns for Block 2 and variable NET_PAYOFF------
+# ------ Add GAIN & LOSS columns for Block 2 and variable NET_PAYOFF
 
 for (i in 1:nrow(Data_B2)) {  
   
@@ -201,7 +195,7 @@ for (i in 1:nrow(Data_B2)) {
     } else if (Data_B2[i, 6]  == 3) {
       Data_B2[i,11] <- 150
       Data_B2[i,12] <- -400
-      Data_B2[i,13] <- -150
+      Data_B2[i,13] <- -250
     } else if (Data_B2[i, 6]  == 4) {
       Data_B2[i,11] <- 150
       Data_B2[i,12] <- -350
@@ -269,13 +263,13 @@ rm(i)
 
 names(Data_B2)[11:13] <- c('gain','loss', 'net_payoff')
 
-# Create data frame containing both blocks
+#------ 4) Create new data frame containing all blocks-------------------
 
 Data_card<-rbind(Data_B1, Data_B2)
 
+rm(Data_B1, Data_B2)
 
-
-## remove Missings
+## Remove Missings
 
 which(is.na(Data_card))
 Data_card <- na.omit(Data_card)
