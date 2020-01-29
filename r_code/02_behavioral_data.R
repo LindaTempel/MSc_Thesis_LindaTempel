@@ -4,18 +4,17 @@
 # 
 # Load helper functions
 setwd("")
-source('./r_functions/getPacks.R') # <- path to getPacks function
+source('./MSc_Thesis_LindaTempel/r_functions/getPacks.R') # <- path to getPacks function
 
 # Load necessary packages
-pkgs <- c('dplyr', 'plyr', 'Hmisc', 'ggplot2', 'tidyr','reshape2', 'corrplot', 'viridis', 'rcompanion',
-          'apaTables', 'scales', 'foreign', 'psych', 'pastecs', 'QuantPsyc', 'stats')
+pkgs <- c('dplyr', 'plyr')
 getPacks(pkgs)
 rm(pkgs)
 
 
-# ----- 1) Read in the data -------------------------------------------
 
-# # Set path before start
+# ----- 1) Set path -------------------------------------------
+
 path <- c("") # <- location of files
 
 paths <- dir(path = path, full.names = T, pattern = "\\.txt$")
@@ -278,5 +277,7 @@ which(is.na(Data_card))
 print(levels(Data_card$Card))
 Data_card$Card <-droplevels.factor(Data_card$Card, exclude= c(0))
 print(levels(Data_card$Card))
+
+
 
 

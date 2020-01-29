@@ -4,19 +4,17 @@
 # 
 # Load helper functions
 setwd("")
-source('./r_functions/getPacks.R') # <- path to getPacks function
+source('./MSc_Thesis_LindaTempel/r_functions/getPacks.R') # <- path to getPacks function
 
 # Load necessary packages
-pkgs <- c('dplyr', 'plyr', 'Hmisc',  'ggplot2', 'tidyr','reshape2', 'corrplot', 
-          'viridis', 'rcompanion', 'apaTables', 'scales', 'foreign', 'psych',
-          'pastecs', 'ppcor')
+pkgs <- c('dplyr', 'plyr', 'foreign', 'psych')
 getPacks(pkgs)
 rm(pkgs)
 
 
 # ----- 1) Read Soscisurvey file ----
 
-Data_pers <-  read.csv(file = "./data_gambling2019_4.csv", sep = ";", header=T)
+Data_pers <-  read.csv(file = "./data_gambling2019.csv", sep = ";", header=T)
 
 
 # ----- 2) Remove Pilot Data and Dropouts-----------------------------
@@ -42,6 +40,8 @@ RST <- dplyr::select(RST, -RS01_63, -RS01_49, -RS01_59, -RS01_72)
 
 # ----- Create aggregated scale values
 # RST SCALE VALUES
+
+RST[is.na(RST)] <- 0
 RST <- dplyr::mutate(RST, 
                      FFFS = (RS01_10 + RS01_24 + RS01_52 + RS01_60 + RS01_61 + RS01_64 + RS01_69 + RS01_77 + RS01_78 + RS01_81),
                      BIS = (RS01_01 + RS01_02 + RS01_07 + RS01_08 + RS01_11 + RS01_21 + RS01_23 + RS01_28 + 
@@ -120,14 +120,14 @@ SOGS <-mutate (SOGS, SOGS_Score=(Score1+Score2+Score3+Score4+Score5+Score6+Score
 
 SOGS_score <-SOGS %>% dplyr::select(VP, SOGS_Score)
 
-# use cutoff 4 to label score
+# use cutoff 5 to label score
 
 for (i in 1:nrow(SOGS_score)) {
   
   if (SOGS_score[i, 2]>4){
     SOGS_score[i,3]<-2
     
-  } else if  (SOGS_score[i, 2] <4 ) {
+  } else if  (SOGS_score[i, 2] <5 ) {
     SOGS_score[i,3] <- 1
     
   }
@@ -157,6 +157,9 @@ rm(Data_pers2)
 
 names(Data_pers_full)[names(Data_pers_full) == 'SD01'] <- 'Gender'
 
+Data_pers_full$Gender<-factor(Data_pers_full$Gender, levels = c(1,2), 
+                        labels=c("Female", "Male"))
+
 
 ### Add Age variable
 
@@ -166,95 +169,84 @@ Data_age <- dplyr::select(Data_pers, VP)
 for (i in 1:nrow(Data_age)) {
   
   if (Data_age[i, 1]=='1560'){
-    Data_age[i,2]<-40
-    Data_age[i,3]<-2
+    Data_age[i,2]<-3
     
   } else if  (Data_age[i, 1] == '1996' ) {
-    Data_age[i,2] <- 43
-    Data_age[i,3]<-3
+    Data_age[i,2]<-3
     
   } else if  (Data_age[i, 1] == '1320' ) {
-    Data_age[i,2] <- 29
-    Data_age[i,3]<-1
+    Data_age[i,2]<-1
     
   } else if  (Data_age[i, 1] == '1152' ) {
-    Data_age[i,2] <- 25
-    Data_age[i,3]<-1
+    Data_age[i,2]<-1
     
   } else if  (Data_age[i, 1] == '1145' ) {
-    Data_age[i,2] <- 40
-    Data_age[i,3]<-2
+    Data_age[i,2]<-3
     
   } else if  (Data_age[i, 1] == '1227' ) {
-    Data_age[i,2] <- 50
-    Data_age[i,3]<-3
+    Data_age[i,2]<-4
     
   } else if  (Data_age[i, 1] == '1073' ) {
-    Data_age[i,2] <- 46
-    Data_age[i,3]<-3
+    Data_age[i,2]<-3
    
   } else if  (Data_age[i, 1] == '1127' ) {
-    Data_age[i,2] <- 37
-    Data_age[i,3]<-2
+    Data_age[i,2]<-2
     
   } else if  (Data_age[i, 1] == '1302' ) {
-    Data_age[i,2] <- 35
-    Data_age[i,3]<-2
+    Data_age[i,2]<-2
 
   } else if  (Data_age[i, 1] == '1023' ) {
-    Data_age[i,2] <- 42
-    Data_age[i,3]<-3
+    Data_age[i,2]<-3
     
   } else if  (Data_age[i, 1] == '1838' ) {
-    Data_age[i,2] <- 36
-    Data_age[i,3]<-2
+    Data_age[i,2]<-2
     
   } else if  (Data_age[i, 1] == '1355' ) {
-    Data_age[i,2] <- 48
-    Data_age[i,3]<-3
+    Data_age[i,2]<-3
     
   } else if  (Data_age[i, 1] == '1164' ) {
-    Data_age[i,2] <- 34
-    Data_age[i,3]<-2
+    Data_age[i,2]<-2
     
   } else if  (Data_age[i, 1] == '1600' ) {
-    Data_age[i,2] <- 52
-    Data_age[i,3]<-4
+    Data_age[i,2]<-4
     
   } else if  (Data_age[i, 1] == '1531' ) {
-    Data_age[i,2] <- 36
-    Data_age[i,3]<-2
+    Data_age[i,2]<-2
     
   } else if  (Data_age[i, 1] == '1621' ) {
-    Data_age[i,2] <- 27
-    Data_age[i,3]<-1
+    Data_age[i,2]<-1
     
   } else if  (Data_age[i, 1] == '1409' ) {
-    Data_age[i,2] <- 35
-    Data_age[i,3]<-2
+    Data_age[i,2]<-2
     
   } else if  (Data_age[i, 1] == '1881' ) {
-  Data_age[i,2] <- 22
-  Data_age[i,3]<-1
+    Data_age[i,2]<-1
   
   } else if  (Data_age[i, 1] == '1878' ) {
-  Data_age[i,2] <- 50
-  Data_age[i,3]<-3
+    Data_age[i,2]<-4
+  
+  } else if  (Data_age[i, 1] == '1296' ) {
+    Data_age[i,2]<-3
+    
+  } else if  (Data_age[i, 1] == '1986' ) {
+    Data_age[i,2]<-2
+    
+  } else if  (Data_age[i, 1] == '1898' ) {
+    Data_age[i,2]<-4
   
   }
 }
 
 rm(i)
-names(Data_age)[2:3] <- c('age', 'age_cat')
+names(Data_age)[2] <- c('age')
 
-Data_age$age_cat<-factor(Data_age$age_cat, levels =c(1,2,3,4), labels =c('18-30','31-40', '41-50', '50+'))
+Data_age$age<-factor(Data_age$age, levels =c(1,2,3,4), labels =c('18-29','30-39', '40-49', '50+'))
 
 Data_pers_full <- merge (Data_pers_full, Data_age)
 rm(Data_age)
 
 # check Missings
 which(is.na(Data_pers_full))
-
 
 
 
@@ -270,7 +262,8 @@ psych::alpha(RST[, grep(names(RST), pattern = '^RS')],
 psych::alpha(dplyr::select(RST, RS01_10, RS01_24, RS01_52, 
                            RS01_60, RS01_61, RS01_64, RS01_69,
                            RS01_77, RS01_78, RS01_81), 
-             check.keys = TRUE)
+             check.keys = F) # here check.keys= false because otherwise it automatically 
+                             # reverses item RS01_64, but this item is not inverted
 
 # BIS
 psych::alpha(dplyr::select(RST, RS01_01, RS01_02, RS01_07, 
@@ -314,9 +307,8 @@ psych::alpha(dplyr::select(RST, RS01_12, RS01_15, RS01_17,
                            RS01_53, RS01_57, RS01_68, RS01_70), 
              check.keys=TRUE)
 
-
 ##BRIEF all
-psych::alpha(BRIEF[,grep(names(BRIEF), pattern= '^BR')],
+psych::alpha(BRIEF[,grep(names(BRIEF), pattern= '^BR1')],
              check.keys = TRUE)
 
 
@@ -373,7 +365,7 @@ psych::alpha(dplyr::select(BRIEF, BR11_41, BR11_42, BR11_43,BR11_44, BR11_45,
              check.keys = TRUE)
 ##GEC
 
-psych:alpha(dplyr::select(BRIEF, BR11_10, BR11_11, BR11_12, BR11_13, BR11_14, 
+psych::alpha(dplyr::select(BRIEF, BR11_10, BR11_11, BR11_12, BR11_13, BR11_14, 
                             BR11_15, BR11_16, BR11_17, BR11_28, BR11_29, BR11_30,
                             BR11_31, BR11_32, BR11_33, BR11_34, BR11_35, BR11_36, BR11_37, 
                             BR11_38, BR11_39, BR11_40, BR11_01, BR11_02, BR11_03, 
