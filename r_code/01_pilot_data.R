@@ -8,8 +8,8 @@ setwd("")
 source('./MSc_Thesis_LindaTempel/r_functions/getPacks.R') # <- path to getPacks function
 
 # Load necessary packages
-pkgs <- c('dplyr', 'plyr', 'Hmisc', 'ggplot2', 'tidyr', 'corrplot', 'viridis', 'rcompanion',
-          'apaTables', 'scales', 'foreign', 'psych', 'pastecs', 'ppcor', 'QuantPsyc', 'stats')
+pkgs <- c('dplyr', 'plyr', 'Hmisc', 'ggplot2', 'tidyr', 'viridis', 'rcompanion',
+          'foreign', 'pastecs', 'stats')
 getPacks(pkgs)
 rm(pkgs)
 
@@ -317,7 +317,7 @@ Data_card$sex<-factor(Data_card$sex, levels = c(1,2),
 
 #------ ANALYSIS OF PILOT DATA-----------
 
-#------ Calculate dependent variables-----
+#------ 1) Calculate dependent variables-----
 
 #----IGT-Score
 
@@ -336,15 +336,11 @@ Data_score <- dcast(Data_sum, VP + Block +reward ~ Card, value.var="N")
 Data_score[is.na(Data_score)] <- 0
 Data_score<- dplyr::mutate(Data_score,IGT_Score=((C+D)-(A+B)))
 
-Data_score<- Data_score %>% dplyr::select (VP, Block, A, B, C, D, IGT_Score, reward)
+#--Loss-Frequency-Score
+Data_score<-dplyr::mutate(Data_score,Freq_Score=((B+D)-(A+C)))
 
-#----Payoff
+Data_score<- Data_score %>% dplyr::select (VP, Block, A, B, C, D, IGT_Score, Freq_Score, reward)
 
-#Select payoff at end of Block only
-Data_payoff<-Data_test %>% dplyr::select(VP, Block, Trial, Payoff, reward)
-Data_payoff<-dplyr::filter(Data_payoff, Trial==100)
-
-Data_payoff<-Data_payoff %>% dplyr::select(VP, Block,Payoff, reward)
 
 #----Reaction time
 
@@ -356,10 +352,9 @@ Data_RT <- Data_card %>%
 #----Combine data frames
 
 Data_pilot <- merge (Data_RT, Data_score)
-Data_pilot <- merge (Data_pilot, Data_payoff)
 
 
-#------ Descriptive Statistics -----------
+#------ 2) Descriptive Statistics -----------
 
 mean(Data_sum$age)
 sd(Data_sum$age)
@@ -370,21 +365,20 @@ sd(Data_pilot$RT)
 by (Data_pilot$RT, Data_pilot$Block, stat.desc)
 by (Data_pilot$RT, Data_pilot$reward, stat.desc)
 
-#Payoff
-mean(Data_pilot$Payoff)
-sd(Data_pilot$Payoff)
-by (Data_pilot$Payoff, Data_pilot$Block, stat.desc)
-by (Data_pilot$Payoff, Data_pilot$reward, stat.desc)
-
 #IGT-Score
 mean(Data_pilot$IGT_Score)
 sd(Data_pilot$IGT_Score)
 by (Data_pilot$IGT_Score, Data_pilot$Block, stat.desc)
 by (Data_pilot$IGT_Score, Data_pilot$reward, stat.desc)
 
+#Loss-Frequency-Score
+mean(Data_pilot$Freq_Score)
+sd(Data_pilot$Freq_Score)
+by (Data_pilot$Freq_Score, Data_pilot$Block, stat.desc)
+by (Data_pilot$Freq_Score, Data_pilot$reward, stat.desc)
 
 
-#------ Graphs------------------
+#------ 3) Graphs------------------
 
 # By Condition
 Graph1 <- Data_sum %>% 

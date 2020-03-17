@@ -137,6 +137,7 @@ for (i in 1:nrow(SOGS_score)) {
 rm(i)
 names(SOGS_score)[3] <- c('SOGS')
 
+#add labels and make factor
 SOGS_score$SOGS<-factor(SOGS_score$SOGS, levels =c(1,2), labels =c('no pathological gambling','pathological gambling'))
 
 

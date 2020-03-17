@@ -259,7 +259,6 @@ for (i in 1:nrow(Data_B2)) {
 
 rm(i)
 
-
 names(Data_B2)[11:13] <- c('gain','loss', 'net_payoff')
 
 #------ 4) Create new data frame containing all blocks-------------------
@@ -268,7 +267,7 @@ Data_card<-rbind(Data_B1, Data_B2)
 
 rm(Data_B1, Data_B2)
 
-## Remove Missings
+## Remove Missings/drop incorrect factor levels
 
 which(is.na(Data_card))
 Data_card <- na.omit(Data_card)

@@ -122,8 +122,6 @@ Data_file$Work<-factor(Data_file$Work, levels = c(1,2),
                                labels=c("Yes", "No"))
 
 
-
-
 # Add variable drug with two categories: cannabis/alcohol vs opioids/stimulants
 
 for (i in 1:nrow(Data_file)) {
@@ -153,7 +151,6 @@ rm(i)
 names(Data_file)[21] <- c('Drug')
 
 Data_file$Drug<-factor(Data_file$Drug, levels =c(1,2), labels =c('Alcohol/Cannabis','Opioids/Stimulants'))
-
 
 
 # Combine with other patient ID
@@ -258,6 +255,37 @@ Data_interview$Smokebreak<-factor(Data_interview$Smokebreak, levels = c(1,2),
 Data_interview$Payment<-factor(Data_interview$Payment, levels = c(1,2), 
                                   labels=c("Yes", "No"))
 
+#Split Length of treatment into two groups and make a factor
+for (i in 1:nrow(Data_interview)) {
+  
+  if (Data_interview[i, 11]=='1'){
+    Data_interview[i,12]<-1
+    
+  } else if  (Data_interview[i, 11] == '2' ) {
+    Data_interview[i,12] <- 1
+    
+  } else if  (Data_interview[i, 11] == '3' ) {
+    Data_interview[i,12] <- 2
+    
+  } else if  (Data_interview[i, 11] == '4' ) {
+    Data_interview[i,12] <- 2
+    
+  } else if  (Data_interview[i, 11] == '5' ) {
+    Data_interview[i,12] <- 2
+    
+    
+  }
+  
+}
+
+
+rm(i)
+names(Data_interview)[12] <- c('Length2')
+
+Data_interview$Length2<-factor(Data_interview$Length2, levels =c(1,2), labels =c('less than 2 months','more than 2 months'))
+
+
+
 # ------3) Read in data from file containing outcome variables----------------------
 
 Data_outcome <- read.csv(file = "./Codierung_Outcomes.csv", sep = ";", header=T)
@@ -283,7 +311,7 @@ Data_outcome$Relapse<-factor(Data_outcome$Relapse, levels =c(0,1),
 # ------4) Combine dataframes---------
 
 Data_file <- Data_file %>% dplyr::select(Crime:VP)
-Data_interview <- Data_interview %>% dplyr::select(VP:Length)
+Data_interview <- Data_interview %>% dplyr::select(VP:Length2)
 Data_outcome <- Data_outcome %>% dplyr::select(VP:WAI)
 
 Data_additional <- merge(Data_file, Data_interview, by.x = 'VP', by.y = 'VP')
